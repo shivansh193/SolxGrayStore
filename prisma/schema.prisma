@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+  referentialIntegrity = "prisma"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique @db.VarChar(255)
+  password    String    @db.Text
+  first_name  String    @db.VarChar(225)
+  last_name   String    @db.VarChar(225)
+  orders      Order[]
+  created_at  DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+model Product {
+  id        Int      @id @default(autoincrement()) 
+  title     String   @db.VarChar(255)
+  content   String
+  orders    Order[]
+  createdAt DateTime 
+  updatedAt DateTime @updatedAt
+}
+model Order{
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [user_id], references: [id])
+  user_id     Int
+  product     Product   @relation(fields: [product_id], references: [id])
+  product_id  Int
+  quantity    Int
+  total       Int
+  payment     Payment[]
+  created_at  DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt   
+}
+
+model Payment{
+  id          Int       @id @default(autoincrement())
+  order       Order     @relation(fields: [order_id], references: [id])
+  order_id    Int
+  status      String
+  created_at  DateTime  @default(now())
+}
